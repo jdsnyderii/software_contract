@@ -1,0 +1,421 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Contract Dependency Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        #cy {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+        #input-section {
+            margin-bottom: 20px;
+        }
+        #yaml-input {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+        }
+        #controls {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="input-section">
+        <h2>Software Contract Dependency Visualizer</h2>
+        <p>Upload a YAML file or paste YAML data representing Software Contracts to visualize the call-chain.</p>
+        <input type="file" id="file-input" accept=".yaml,.yml">
+        <label for="yaml-input"><textarea id="yaml-input" placeholder="Or paste YAML data here..."></textarea></label>
+        <button onclick="visualize()">Visualize</button>
+        <div id="error"></div>
+    </div>
+    <div id="controls">
+        <button onclick="zoomIn()">Zoom In</button>
+        <button onclick="zoomOut()">Zoom Out</button>
+        <button onclick="relayout()">Relayout</button>
+        <button id="export-svg" onclick="exportSVG()" disabled>Export SVG</button>
+    </div>
+    <div id="cy"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.21.1/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-svg@0.4.0/cytoscape-svg.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script>
+        let cy;
+
+        function initializeCytoscape() {
+            try {
+                console.log('Attempting Cytoscape initialization...');
+
+                // Verify Cytoscape is available
+                if (typeof cytoscape !== 'function') {
+                    throw new Error('Cytoscape library not loaded');
+                }
+
+                // Register cytoscape-svg extension if available
+                if (typeof window.cytoscapeSvg === 'function' && typeof cytoscape.svg !== 'function') {
+                    try {
+                        cytoscape.use(window.cytoscapeSvg);
+                        console.log('cytoscape-svg extension registered');
+                    } catch (e) {
+                        console.warn('Failed to register cytoscape-svg extension:', e);
+                    }
+                } else {
+                    console.warn('cytoscape-svg extension not loaded; SVG export may not work');
+                }
+
+                // Verify js-yaml is available
+                if (typeof jsyaml === 'undefined') {
+                    throw new Error('js-yaml library not loaded');
+                }
+
+                cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    style: [
+                        {
+                            selector: 'node[type="system"]',
+                            style: {
+                                'background-color': '#007bff',
+                                'label': 'data(label)',
+                                'color': '#fff',
+                                'text-valign': 'center',
+                                'text-halign': 'center',
+                                'shape': 'rectangle',
+                                'width': 'label',
+                                'height': 'label',
+                                'padding': '10px'
+                            }
+                        },
+                        {
+                            selector: 'node[type="contract"]',
+                            style: {
+                                'background-color': '#28a745',
+                                'label': 'data(label)',
+                                'color': '#fff',
+                                'text-valign': 'center',
+                                'text-halign': 'center',
+                                'shape': 'ellipse',
+                                'width': 'label',
+                                'height': 'label',
+                                'padding': '10px'
+                            }
+                        },
+                        {
+                            selector: 'node.selected',
+                            style: {
+                                'border-width': '3px',
+                                'border-color': '#ff0',
+                                'background-color': '#ff9900'
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 2,
+                                'line-color': '#666',
+                                'target-arrow-color': '#666',
+                                'target-arrow-shape': 'triangle',
+                                'curve-style': 'bezier'
+                            }
+                        }
+                    ],
+                    layout: {
+                        name: 'cose',
+                        idealEdgeLength: 100,
+                        nodeOverlap: 20,
+                        fit: true,
+                        padding: 30
+                    },
+                    minZoom: 0.1,
+                    maxZoom: 10
+                });
+
+                cy.on('tap click', 'node', function(evt) {
+                    const node = evt.target;
+                    const label = node.data('label') || 'Unknown';
+                    const type = node.data('type') || 'Unknown';
+                    const pos = evt.position || evt.cyPosition;
+                    console.log(`Clicked node: ${label} (Type: ${type}) at model position: x=${pos.x}, y=${pos.y}`);
+
+                    if (node.hasClass('selected')) {
+                        node.removeClass('selected');
+                    } else {
+                        node.addClass('selected');
+                    }
+                });
+
+                console.log('Cytoscape initialized successfully');
+            } catch (e) {
+                console.error('Failed to initialize Cytoscape:', e);
+                const errorDiv = document.getElementById('error');
+                errorDiv.textContent = 'Failed to initialize graph. Please try reloading the page.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function zoomIn() {
+            if (!cy) return;
+            const currentZoom = cy.zoom();
+            const newZoom = Math.min(currentZoom * 1.2, cy.maxZoom());
+            cy.zoom(newZoom);
+            cy.fit(cy.elements(), 30);
+        }
+
+        function zoomOut() {
+            if (!cy) return;
+            const currentZoom = cy.zoom();
+            const newZoom = Math.max(currentZoom / 1.2, cy.minZoom());
+            cy.zoom(newZoom);
+            cy.fit(cy.elements(), 30);
+        }
+
+        function relayout() {
+            if (!cy) return;
+            cy.layout({
+                name: 'cose',
+                idealEdgeLength: 100,
+                nodeOverlap: 20,
+                fit: true,
+                padding: 30
+            }).run();
+        }
+
+        function exportSVG() {
+            const errorDiv = document.getElementById('error');
+            errorDiv.style.display = 'none';
+
+            if (!cy) {
+                errorDiv.textContent = 'Graph not initialized. Please try reloading the page.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (!cy.elements().length) {
+                errorDiv.textContent = 'No diagram to export. Please visualize a graph first.';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const svgContent = cy.svg({ full: true });
+                const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'software_contract_diagram.svg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                errorDiv.textContent = `Error exporting SVG: ${e.message}`;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function parseContracts(data) {
+            const elements = [];
+            const contracts = Array.isArray(data) ? data : [data];
+
+            contracts.forEach(contract => {
+                elements.push({
+                    data: {
+                        id: contract.contract_id,
+                        label: contract.name || 'Unnamed Contract',
+                        type: 'contract'
+                    }
+                });
+
+                if (contract.calling_systems) {
+                    contract.calling_systems.forEach(system => {
+                        elements.push({
+                            data: {
+                                id: system.system_id,
+                                label: system.name || 'Unnamed System',
+                                type: 'system'
+                            }
+                        });
+                        elements.push({
+                            data: {
+                                id: `edge-${system.system_id}-${contract.contract_id}`,
+                                source: system.system_id,
+                                target: contract.contract_id
+                            }
+                        });
+                    });
+                }
+
+                if (contract.dependent_contracts) {
+                    contract.dependent_contracts.forEach(depContract => {
+                        elements.push({
+                            data: {
+                                id: depContract.contract_id,
+                                label: depContract.name || 'Unnamed Contract',
+                                type: 'contract'
+                            }
+                        });
+                        elements.push({
+                            data: {
+                                id: `edge-${contract.contract_id}-${depContract.contract_id}`,
+                                source: contract.contract_id,
+                                target: depContract.contract_id
+                            }
+                        });
+                    });
+                }
+            });
+
+            return elements;
+        }
+
+        function visualize() {
+            const fileInput = document.getElementById('file-input');
+            const yamlInput = document.getElementById('yaml-input');
+            const errorDiv = document.getElementById('error');
+            const exportButton = document.getElementById('export-svg');
+
+            errorDiv.style.display = 'none';
+
+            if (!cy) {
+                errorDiv.textContent = 'Graph not initialized. Please try reloading the page.';
+                errorDiv.style.display = 'block';
+                exportButton.disabled = true;
+                return;
+            }
+
+            const processYaml = (yamlData) => {
+                try {
+                    const data = jsyaml.load(yamlData);
+                    const elements = parseContracts(data);
+                    cy.elements().remove();
+                    cy.add(elements);
+                    cy.layout({
+                        name: 'cose',
+                        idealEdgeLength: 100,
+                        nodeOverlap: 20,
+                        fit: true,
+                        padding: 30
+                    }).run();
+                    exportButton.disabled = false;
+                } catch (e) {
+                    errorDiv.textContent = `Error parsing YAML: ${e.message}`;
+                    errorDiv.style.display = 'block';
+                    exportButton.disabled = true;
+                }
+            };
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => processYaml(e.target.result);
+                reader.readAsText(file);
+            } else if (yamlInput.value.trim()) {
+                processYaml(yamlInput.value);
+            } else {
+                errorDiv.textContent = 'Please upload a YAML file or paste YAML data.';
+                errorDiv.style.display = 'block';
+                exportButton.disabled = true;
+            }
+        }
+
+        // Poll for script availability before initializing
+        function waitForScripts(callback) {
+            const maxAttempts = 10;
+            let attempts = 0;
+
+            function checkScripts() {
+                if (typeof cytoscape === 'function' && typeof jsyaml !== 'undefined' && typeof window.cytoscapeSvg !== 'undefined') {
+                    console.log('All required scripts loaded');
+                    callback();
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    console.log(`Scripts not ready (cytoscape: ${typeof cytoscape}, jsyaml: ${typeof jsyaml}, cytoscapeSvg: ${typeof window.cytoscapeSvg}), attempt ${attempts}/${maxAttempts}`);
+                    setTimeout(checkScripts, 500);
+                } else {
+                    const errorDiv = document.getElementById('error');
+                    errorDiv.textContent = 'Required libraries failed to load. Please try reloading the page.';
+                    errorDiv.style.display = 'block';
+                    console.error('Failed to load required scripts after', maxAttempts, 'attempts');
+                }
+            }
+
+            checkScripts();
+        }
+
+        // Initialize when DOM is ready and scripts are loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForScripts(initializeCytoscape);
+        });
+    </script>
+</body>
+</html>
