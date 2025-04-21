@@ -23,3 +23,10 @@ code for me. I need a meta-driven generator that uses the LinkML schema to help 
 excellent instructions.
 The last think that I need help with is for you to generate a Dockerfile that will allow me to both build and run the
 app inside the a Container so that I do not have to install python code on my local computer to make this run.
+
+
+## Add a visualizer
+
+Great that fixed the bug!
+Can you add some control buttons for zoom in and out as well as a button to relayout the diagram?
+
