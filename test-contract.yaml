@@ -1,0 +1,14 @@
+- contract_id: C1
+  name: User Authentication
+  calling_systems:
+    - system_id: S1
+      name: Web Frontend
+  dependent_contracts:
+    - contract_id: C2
+      name: Session Management
+- contract_id: C2
+  name: Session Management
+  calling_systems:
+    - system_id: S2
+      name: API Gateway
+  dependent_contracts: []
