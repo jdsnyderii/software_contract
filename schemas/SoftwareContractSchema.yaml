@@ -1,0 +1,241 @@
+# LinkML schema for a Software System Contract
+# Represents a contract with preconditions, postconditions, invariants, behavior description,
+# calling systems, dependent contracts, and metadata for authors and reviewer comments.
+
+schema:
+  id: http://example.org/software-contract
+  name: SoftwareContractSchema
+  description: A schema for defining software system contracts with conditions, behaviors, dependencies, and metadata.
+  version: 1.0.0
+  prefixes:
+    linkml: https://w3id.org/linkml/
+    schema: http://schema.org/
+  imports:
+    - linkml:types
+  default_prefix: software_contract
+
+classes:
+  SoftwareContract:
+    description: A contract defining the expectations and behaviors of a software system.
+    slots:
+      - contract_id
+      - name
+      - description
+      - preconditions
+      - postconditions
+      - invariants
+      - behavior_description
+      - calling_systems
+      - dependent_contracts
+      - metadata
+
+  Condition:
+    description: A condition that must be satisfied (e.g., precondition, postcondition, invariant).
+    slots:
+      - condition_id
+      - description
+      - expression
+      - evaluation_context
+
+  BehaviorDescription:
+    description: A description of the expected behavior of the system under the contract.
+    slots:
+      - behavior_id
+      - description
+      - input_parameters
+      - output_parameters
+      - sequence_diagram_ref
+
+  System:
+    description: A system that interacts with the contract (e.g., caller or dependency).
+    slots:
+      - system_id
+      - name
+      - description
+      - owner
+      - contact_info
+
+  Metadata:
+    description: Metadata about the contract, including authorship and reviewer comments.
+    slots:
+      - authors
+      - creation_date
+      - last_modified
+      - version
+      - reviewer_comments
+
+  Author:
+    description: An individual or entity that authored the contract.
+    slots:
+      - author_id
+      - name
+      - email
+      - organization
+
+  ReviewerComment:
+    description: A comment provided by a reviewer of the contract.
+    slots:
+      - comment_id
+      - reviewer_name
+      - comment_text
+      - comment_date
+
+slots:
+  contract_id:
+    identifier: true
+    description: Unique identifier for the contract.
+    range: string
+
+  name:
+    description: Human-readable name of the contract or system.
+    range: string
+    required: true
+
+  description:
+    description: Detailed description of the contract, condition, behavior, or system.
+    range: string
+
+  preconditions:
+    description: Conditions that must be true before the contract is executed.
+    range: Condition
+    multivalued: true
+    inlined_as_list: true
+
+  postconditions:
+    description: Conditions that must be true after the contract is executed.
+    range: Condition
+    multivalued: true
+    inlined_as_list: true
+
+  invariants:
+    description: Conditions that must remain true throughout the contract's execution.
+    range: Condition
+    multivalued: true
+    inlined_as_list: true
+
+  behavior_description:
+    description: Description of the expected behavior of the system.
+    range: BehaviorDescription
+    inlined: true
+
+  calling_systems:
+    description: Systems that invoke this contract.
+    range: System
+    multivalued: true
+    inlined_as_list: true
+
+  dependent_contracts:
+    description: Other contracts that this contract depends on to satisfy its conditions or behaviors.
+    range: SoftwareContract
+    multivalued: true
+    inlined_as_list: true
+
+  metadata:
+    description: Metadata about the contract, including authors and reviewer comments.
+    range: Metadata
+    inlined: true
+    required: true
+
+  condition_id:
+    identifier: true
+    description: Unique identifier for a condition.
+    range: string
+
+  expression:
+    description: Formal or informal expression of the condition (e.g., logical statement or code snippet).
+    range: string
+
+  evaluation_context:
+    description: Context or environment in which the condition is evaluated (e.g., system state, variables).
+    range: string
+
+  behavior_id:
+    identifier: true
+    description: Unique identifier for a behavior description.
+    range: string
+
+  input_parameters:
+    description: Parameters required as input for the behavior.
+    range: string
+    multivalued: true
+
+  output_parameters:
+    description: Parameters produced as output by the behavior.
+    range: string
+    multivalued: true
+
+  sequence_diagram_ref:
+    description: Reference to a sequence diagram or other documentation describing the behavior.
+    range: string
+
+  system_id:
+    identifier: true
+    description: Unique identifier for a system.
+    range: string
+
+  owner:
+    description: Entity responsible for the system.
+    range: string
+
+  contact_info:
+    description: Contact information for the system's owner or administrator.
+    range: string
+
+  authors:
+    description: List of authors who created the contract.
+    range: Author
+    multivalued: true
+    inlined_as_list: true
+    required: true
+
+  creation_date:
+    description: Date the contract was created.
+    range: date
+
+  last_modified:
+    description: Date the contract was last modified.
+    range: date
+
+  version:
+    description: Version of the contract.
+    range: string
+    required: true
+
+  reviewer_comments:
+    description: Comments provided by reviewers of the contract.
+    range: ReviewerComment
+    multivalued: true
+    inlined_as_list: true
+
+  author_id:
+    identifier: true
+    description: Unique identifier for an author.
+    range: string
+
+  email:
+    description: Email address of the author.
+    range: string
+
+  organization:
+    description: Organization the author is affiliated with.
+    range: string
+
+  comment_id:
+    identifier: true
+    description: Unique identifier for a reviewer comment.
+    range: string
+
+  reviewer_name:
+    description: Name of the reviewer who provided the comment.
+    range: string
+    required: true
+
+  comment_text:
+    description: Text of the reviewer's comment.
+    range: string
+    required: true
+
+  comment_date:
+    description: Date the comment was made.
+    range: date
+

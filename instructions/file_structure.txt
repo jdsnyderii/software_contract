@@ -1,0 +1,17 @@
+/contract_editor/
+  /contract_app/
+    /migrations/
+    __init__.py
+    admin.py
+    apps.py
+    models.py        # Django models generated from the schema
+    serializers.py   # DRF serializers for API
+    views.py         # DRF viewsets for API
+    urls.py          # API URL routing
+  /templates/
+    index.html       # Frontend editor
+  /contract_editor/
+    __init__.py
+    settings.py      # Django settings
+    urls.py          # Main URL configuration
+  manage.py
