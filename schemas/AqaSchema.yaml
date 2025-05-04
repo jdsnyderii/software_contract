@@ -1,0 +1,132 @@
+id: https://example.org/three-part-namespace
+name: ThreePartNamespace_Model
+prefixes:
+  linkml: https://w3id.org/linkml/
+  tpn: https://example.org/tpn/
+imports:
+  - linkml:types
+default_range: string
+
+classes:
+  Namespace:
+    description: The root of the 3-part namespace hierarchy, containing a Part1 container.
+    tree_root: true
+    slots:
+      - part1_container
+
+  Part1Container:
+    description: A container for all Part1 entities in the namespace.
+    slots:
+      - part1s
+
+  Part1:
+    description: The top-level entity in the 3-part namespace (e.g., an organization).
+    slots:
+      - name
+      - valid_part2s
+      - part2s
+    slot_usage:
+      name:
+        required: true
+        structured_pattern:
+          syntax: "^(OrgA|OrgB)$"
+          interpolated: false
+      valid_part2s:
+        required: true
+        multivalued: true
+        structured_pattern:
+          syntax: "^(DeptX|DeptY|DeptZ)$"
+          interpolated: true
+
+  Part2:
+    description: The mid-level entity in the 3-part namespace (e.g., a department).
+    slots:
+      - name
+      - parent_part1
+      - valid_part3s
+      - part3s
+    slot_usage:
+      name:
+        required: true
+        structured_pattern:
+          syntax: "^(DeptX|DeptY|DeptZ)$"
+          interpolated: true
+      parent_part1:
+        required: true
+        structured_pattern:
+          syntax: "^(OrgA|OrgB)$"
+          interpolated: true
+      valid_part3s:
+        required: true
+        multivalued: true
+        structured_pattern:
+          syntax: "^(Project1|Project2|Project3|Project4)$"
+          interpolated: true
+
+  Part3:
+    description: The leaf-level entity in the 3-part namespace (e.g., a project).
+    slots:
+      - name
+      - parent_part2
+    slot_usage:
+      name:
+        required: true
+        structured_pattern:
+          syntax: "^(Project1|Project2|Project3|Project4)$"
+          interpolated: true
+      parent_part2:
+        required: true
+        structured_pattern:
+          syntax: "^(DeptX|DeptY|DeptZ)$"
+          interpolated: true
+
+slots:
+  part1_container:
+    description: The container for all Part1 entities in the namespace.
+    range: Part1Container
+    inlined_as_list: true
+    required: true
+
+  part1s:
+    description: The Part1 entities contained in the Part1Container.
+    range: Part1
+    multivalued: true
+    inlined_as_list: true
+    required: true
+
+  name:
+    description: The name of the namespace part.
+    identifier: true
+
+  valid_part2s:
+    description: The valid Part2 names allowed for this Part1.
+    multivalued: true
+    required: true
+    inlined_as_list: true
+
+  part2s:
+    description: The Part2 entities associated with this Part1.
+    range: Part2
+    multivalued: true
+    inlined_as_list: true
+    required: true
+
+  parent_part1:
+    description: The Part1 to which this Part2 belongs.
+    required: true
+
+  valid_part3s:
+    description: The valid Part3 names allowed for this Part2.
+    multivalued: true
+    required: true
+
+  part3s:
+    description: The Part3 entities associated with this Part2.
+    range: Part3
+    multivalued: true
+    inlined_as_list: true
+    required: true
+
+  parent_part2:
+    description: The Part2 to which this Part3 belongs.
+    required: true

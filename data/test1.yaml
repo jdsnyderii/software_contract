@@ -1,0 +1,28 @@
+part1_container:
+  part1s:
+    - name: OrgAAAAA
+      valid_part2s: [DeptX, DeptY]
+      part2s:
+        - name: DeptZ
+          parent_part1: OrgA
+          valid_part3s: [Project1, Project2]
+          part3s:
+            - name: Project1
+              parent_part2: DeptX
+            - name: Project2
+              parent_part2: DeptX
+        - name: DeptY
+          parent_part1: OrgA
+          valid_part3s: [Project3]
+          part3s:
+            - name: Project3
+              parent_part2: DeptY
+    - name: OrgB
+      valid_part2s: [DeptZ]
+      part2s:
+        - name: DeptZ
+          parent_part1: OrgB
+          valid_part3s: [Project4]
+          part3s:
+            - name: Project4
+              parent_part2: DeptZ

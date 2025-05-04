@@ -1,0 +1,566 @@
+{
+    "$defs": {
+        "DeptX": {
+            "additionalProperties": false,
+            "description": "Department X, under OrgA, with specific projects.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^DeptX$"
+                },
+                "parent_part1": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The Part1 to which this Part2 belongs.",
+                    "pattern": "^OrgA$"
+                },
+                "part3s": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Part3__identifier_optional"
+                            },
+                            {
+                                "$ref": "#/$defs/Part2Enum",
+                                "description": "The Part2 to which this Part3 belongs."
+                            }
+                        ]
+                    },
+                    "description": "The Part3 entities associated with this Part2.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part3s": {
+                    "description": "The valid Part3 names allowed for this Part2.",
+                    "items": {
+                        "$ref": "#/$defs/Part3Enum",
+                        "anyOf": [
+                            {
+                                "const": "Project1"
+                            },
+                            {
+                                "const": "Project2"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part1",
+                "valid_part3s"
+            ],
+            "title": "DeptX",
+            "type": "object"
+        },
+        "DeptY": {
+            "additionalProperties": false,
+            "description": "Department Y, under OrgA, with specific projects.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^DeptY$"
+                },
+                "parent_part1": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The Part1 to which this Part2 belongs.",
+                    "pattern": "^OrgA$"
+                },
+                "part3s": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Part3__identifier_optional"
+                            },
+                            {
+                                "$ref": "#/$defs/Part2Enum",
+                                "description": "The Part2 to which this Part3 belongs."
+                            }
+                        ]
+                    },
+                    "description": "The Part3 entities associated with this Part2.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part3s": {
+                    "description": "The valid Part3 names allowed for this Part2.",
+                    "items": {
+                        "$ref": "#/$defs/Part3Enum",
+                        "anyOf": [
+                            {
+                                "const": "Project3"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part1",
+                "valid_part3s"
+            ],
+            "title": "DeptY",
+            "type": "object"
+        },
+        "DeptZ": {
+            "additionalProperties": false,
+            "description": "Department Z, under OrgB, with specific projects.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^DeptZ$"
+                },
+                "parent_part1": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The Part1 to which this Part2 belongs.",
+                    "pattern": "^OrgB$"
+                },
+                "part3s": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Part3__identifier_optional"
+                            },
+                            {
+                                "$ref": "#/$defs/Part2Enum",
+                                "description": "The Part2 to which this Part3 belongs."
+                            }
+                        ]
+                    },
+                    "description": "The Part3 entities associated with this Part2.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part3s": {
+                    "description": "The valid Part3 names allowed for this Part2.",
+                    "items": {
+                        "$ref": "#/$defs/Part3Enum",
+                        "anyOf": [
+                            {
+                                "const": "Project4"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part1",
+                "valid_part3s"
+            ],
+            "title": "DeptZ",
+            "type": "object"
+        },
+        "Namespace": {
+            "additionalProperties": false,
+            "description": "",
+            "properties": {
+                "namespace": {
+                    "description": "a namespace validator",
+                    "items": {
+                        "$ref": "#/$defs/Part1Enum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "Namespace",
+            "type": "object"
+        },
+        "OrgA": {
+            "additionalProperties": false,
+            "description": "Organization A, with specific departments.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^OrgA$"
+                },
+                "part2s": {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/Part2__identifier_optional"
+                    },
+                    "description": "The Part2 entities associated with this Part1.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part2s": {
+                    "description": "The valid Part2 names allowed for this Part1.",
+                    "items": {
+                        "$ref": "#/$defs/Part2Enum",
+                        "anyOf": [
+                            {
+                                "const": "DeptX"
+                            },
+                            {
+                                "const": "DeptY"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "valid_part2s"
+            ],
+            "title": "OrgA",
+            "type": "object"
+        },
+        "OrgB": {
+            "additionalProperties": false,
+            "description": "Organization B, with specific departments.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^OrgB$"
+                },
+                "part2s": {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/Part2__identifier_optional"
+                    },
+                    "description": "The Part2 entities associated with this Part1.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part2s": {
+                    "description": "The valid Part2 names allowed for this Part1.",
+                    "items": {
+                        "$ref": "#/$defs/Part2Enum",
+                        "anyOf": [
+                            {
+                                "const": "DeptZ"
+                            }
+                        ]
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "valid_part2s"
+            ],
+            "title": "OrgB",
+            "type": "object"
+        },
+        "Part1": {
+            "additionalProperties": false,
+            "description": "The top-level entity in the 3-part namespace (e.g., an organization).",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The name of the namespace part."
+                },
+                "part2s": {
+                    "additionalProperties": {
+                        "$ref": "#/$defs/Part2__identifier_optional"
+                    },
+                    "description": "The Part2 entities associated with this Part1.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part2s": {
+                    "description": "The valid Part2 names allowed for this Part1.",
+                    "items": {
+                        "$ref": "#/$defs/Part2Enum"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "valid_part2s"
+            ],
+            "title": "Part1",
+            "type": "object"
+        },
+        "Part1Enum": {
+            "description": "",
+            "enum": [
+                "OrgA",
+                "OrgB"
+            ],
+            "title": "Part1Enum",
+            "type": "string"
+        },
+        "Part2": {
+            "additionalProperties": false,
+            "description": "The mid-level entity in the 3-part namespace (e.g., a department).",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The name of the namespace part."
+                },
+                "parent_part1": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The Part1 to which this Part2 belongs."
+                },
+                "part3s": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Part3__identifier_optional"
+                            },
+                            {
+                                "$ref": "#/$defs/Part2Enum",
+                                "description": "The Part2 to which this Part3 belongs."
+                            }
+                        ]
+                    },
+                    "description": "The Part3 entities associated with this Part2.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part3s": {
+                    "description": "The valid Part3 names allowed for this Part2.",
+                    "items": {
+                        "$ref": "#/$defs/Part3Enum"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part1",
+                "valid_part3s"
+            ],
+            "title": "Part2",
+            "type": "object"
+        },
+        "Part2Enum": {
+            "description": "",
+            "enum": [
+                "DeptX",
+                "DeptY",
+                "DeptZ"
+            ],
+            "title": "Part2Enum",
+            "type": "string"
+        },
+        "Part2__identifier_optional": {
+            "additionalProperties": false,
+            "description": "The mid-level entity in the 3-part namespace (e.g., a department).",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The name of the namespace part."
+                },
+                "parent_part1": {
+                    "$ref": "#/$defs/Part1Enum",
+                    "description": "The Part1 to which this Part2 belongs."
+                },
+                "part3s": {
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/Part3__identifier_optional"
+                            },
+                            {
+                                "$ref": "#/$defs/Part2Enum",
+                                "description": "The Part2 to which this Part3 belongs."
+                            }
+                        ]
+                    },
+                    "description": "The Part3 entities associated with this Part2.",
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "valid_part3s": {
+                    "description": "The valid Part3 names allowed for this Part2.",
+                    "items": {
+                        "$ref": "#/$defs/Part3Enum"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "parent_part1",
+                "valid_part3s"
+            ],
+            "title": "Part2",
+            "type": "object"
+        },
+        "Part3": {
+            "additionalProperties": false,
+            "description": "The leaf-level entity in the 3-part namespace (e.g., a project).",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part."
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs."
+                }
+            },
+            "required": [
+                "name",
+                "parent_part2"
+            ],
+            "title": "Part3",
+            "type": "object"
+        },
+        "Part3Enum": {
+            "description": "",
+            "enum": [
+                "Project1",
+                "Project2",
+                "Project3",
+                "Project4"
+            ],
+            "title": "Part3Enum",
+            "type": "string"
+        },
+        "Part3__identifier_optional": {
+            "additionalProperties": false,
+            "description": "The leaf-level entity in the 3-part namespace (e.g., a project).",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part."
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs."
+                }
+            },
+            "required": [
+                "parent_part2"
+            ],
+            "title": "Part3",
+            "type": "object"
+        },
+        "Project1": {
+            "additionalProperties": false,
+            "description": "Project 1, under DeptX.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^Project1$"
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs.",
+                    "pattern": "^DeptX$"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part2"
+            ],
+            "title": "Project1",
+            "type": "object"
+        },
+        "Project2": {
+            "additionalProperties": false,
+            "description": "Project 2, under DeptX.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^Project2$"
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs.",
+                    "pattern": "^DeptX$"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part2"
+            ],
+            "title": "Project2",
+            "type": "object"
+        },
+        "Project3": {
+            "additionalProperties": false,
+            "description": "Project 3, under DeptY.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^Project3$"
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs.",
+                    "pattern": "^DeptY$"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part2"
+            ],
+            "title": "Project3",
+            "type": "object"
+        },
+        "Project4": {
+            "additionalProperties": false,
+            "description": "Project 4, under DeptZ.",
+            "properties": {
+                "name": {
+                    "$ref": "#/$defs/Part3Enum",
+                    "description": "The name of the namespace part.",
+                    "pattern": "^Project4$"
+                },
+                "parent_part2": {
+                    "$ref": "#/$defs/Part2Enum",
+                    "description": "The Part2 to which this Part3 belongs.",
+                    "pattern": "^DeptZ$"
+                }
+            },
+            "required": [
+                "name",
+                "parent_part2"
+            ],
+            "title": "Project4",
+            "type": "object"
+        }
+    },
+    "$id": "https://example.org/three-part-namespace",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": true,
+    "description": "",
+    "metamodel_version": "1.7.0",
+    "properties": {
+        "namespace": {
+            "description": "a namespace validator",
+            "items": {
+                "$ref": "#/$defs/Part1Enum"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        }
+    },
+    "title": "ThreePartNamespace_Model",
+    "type": "object",
+    "version": null
+}
